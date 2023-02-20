@@ -1,5 +1,4 @@
 import win32api
-import random
     
 def triggeralarm():
     for i in range(20):

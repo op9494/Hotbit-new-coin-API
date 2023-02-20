@@ -3,7 +3,7 @@ import time
 import requests
 import json
 from pandas import *
-from alarm import triggeralarm
+# from alarm import triggeralarm
 from updatemarket import update_market_data
 from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError
@@ -33,14 +33,17 @@ def getcoinarray(coinlist):
 def startCollectidata():
     try:
         global previouscount
-        response = session.get('https://api.hotbit.io/api/v1/asset.list')
+        # To get the asset count in hotbit not listed in the market
+        # response = session.get('https://api.hotbit.io/api/v1/asset.list')
+        # To get the market count in hotbit listed in the market
+        response = session.get('https://api.hotbit.io/api/v1/market.list')
         jsonresponse = response.json()
         print(time.strftime("%D || %H:%M:%S", time.localtime()), end=" ")
         if response.status_code == 200 and jsonresponse["error"] == None and len(jsonresponse["result"]) > 1:
             currentcount = len(jsonresponse["result"])
             coinlist = jsonresponse["result"]
             coindata = getcoinarray(coinlist)
-            if previouscount!=0:
+            if previouscount != 0:
                 new_coin = getnewcoin(coindata)
             else:
                 new_coin = []
@@ -52,11 +55,10 @@ def startCollectidata():
                 print("Coin removed from hotbit")
 
             elif currentcount > previouscount:
-                triggeralarm()
                 requests.post(
                     'https://maker.ifttt.com/trigger/new_coin_added/json/with/key/dSVi-LSPxLsmxLEKTI3HxL', json={'coinname': new_coin})
-
-                print("New coin added to hotbit")
+               # triggeralarm()
+                print("New coin added to hotbit", new_coin)
             elif previouscount == currentcount:
                 print("No new coin added to hotbit")
             update_market_data(time.strftime("%D || %H:%M:%S", time.localtime(
@@ -65,10 +67,13 @@ def startCollectidata():
             previouscount = currentcount
 
     except ConnectionError as ce:
+        requests.post(
+                    'https://maker.ifttt.com/trigger/new_coin_added/json/with/key/dSVi-LSPxLsmxLEKTI3HxL', json={'error': ce})
+              
         print(ce)
 
 
-schedule.every(30).seconds.do(startCollectidata)
+schedule.every(11).seconds.do(startCollectidata)
 
 
 while True:
