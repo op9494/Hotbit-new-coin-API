@@ -5,6 +5,7 @@ from pandas import *
 
 # list of column names
 field_names = ['Date', 'PreviousCount','CurrentCount', 'CoinList','DifferenceList']
+launch_field_names = ['Date','CoinList','new_coin']
  
 def update_market_data(date, previous_count, current_count,coinlist,differencelist=[]):
     global field_names
@@ -25,4 +26,13 @@ def update_market_data(date, previous_count, current_count,coinlist,differenceli
     
         # # Close the file object
         csvfile.close()
-list=["DAR","SIR"]
+
+def update_launchedcoin_data(date,coinlist,newcoin=[]):
+    global launch_field_names
+    # Open CSV file in append mode
+    # Create a file object for this file
+    data = { 'Date':date, 'CoinList':coinlist,'new_coin':newcoin}
+    with open('launchedcoins.csv', 'a', newline='') as csvfile:
+        write_obj = DictWriter(csvfile, fieldnames=launch_field_names)
+        write_obj.writerow(data)
+        csvfile.close()
